@@ -1,9 +1,9 @@
 /********************************************************
 Author: Vinay Bhat
 ********************************************************
-Usage: return_image = riopoly(input_image, column_list, row_list)
+Usage: return_image = roipoly(input_image, column_list, row_list)
 Example:
-  im = riopoly(image, [0 100 100 0], [0 0 100 100])
+  im = roipoly(image, [0 100 100 0], [0 0 100 100])
 ********************************************************/
 
 #include <numeric>
@@ -22,7 +22,7 @@ extern "C"
   #include "sciprint.h"
   #include "../common.h"
 
-  int opencv_riopoly(char *fname, unsigned long fname_len)
+  int opencv_roipoly(char *fname, unsigned long fname_len)
   {
 
     SciErr sciErr;
@@ -133,7 +133,7 @@ extern "C"
     memcpy(checker, tempstring.c_str(), tempstring.size() + 1);
     returnImage(checker, img, 1);
     free(checker);
-    
+
     //Assigning the list as the Output Variable
     AssignOutputVariable(pvApiCtx, 1) = nbInputArgument(pvApiCtx) + 1;
     //Returning the Output Variables as arguments to the Scilab environment
