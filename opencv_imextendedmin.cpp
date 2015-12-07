@@ -27,7 +27,7 @@ extern "C"
   unsigned char get_sneighbour(Mat, int, int);
   unsigned char get_neighbour(Mat, int, int);
 
-  int opencv_imextendedmax(char *fname, unsigned long fname_len)
+  int opencv_imextendedmin(char *fname, unsigned long fname_len)
   {
 
     SciErr sciErr;
