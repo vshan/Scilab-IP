@@ -22,10 +22,10 @@ extern "C"
   #include "sciprint.h"
   #include "../common.h"
   
-  int is_RegionalMaxima(Mat, int, int, int*);
-  void set_RegionalMaxima(Mat&, int, int, double);
-  unsigned char get_SNeighbour(Mat, int, int);
-  unsigned char get_Neighbour(Mat, int, int);
+  int is_RegionalMinima(Mat, int, int, int*);
+  void set_RegionalMinima(Mat&, int, int, double);
+  unsigned char get_sneighbour(Mat, int, int);
+  unsigned char get_neighbour(Mat, int, int);
 
   int opencv_imextendedmax(char *fname, unsigned long fname_len)
   {
@@ -76,17 +76,17 @@ extern "C"
     {
         for (j = 0; j < gray_image.rows-2; j++)
         {   val = gray_image.at<uchar>(i,j);
-            if (is_RegionalMaxima(gray_image, i, j, &flag))
+            if (is_RegionalMinima(gray_image, i, j, &flag))
             {   
                if (flag)
                {
-                  unsigned char v = get_Neighbour(gray_image, i, j);
+                  unsigned char v = get_neighbour(gray_image, i, j);
                   if ((val - v) > h)
-                    set_RegionalMaxima(fin_image, i, j, 255);
+                    set_RegionalMinima(fin_image, i, j, 255);
                }
                else
                {
-                  unsigned char v = get_SNeighbour(gray_image, i, j);
+                  unsigned char v = get_sneighbour(gray_image, i, j);
                   if ((val - v) > h)
                     fin_image.at<uchar>(i,j) = 255;
                }
@@ -108,7 +108,7 @@ extern "C"
     return 0;
 
   }
-  int is_RegionalMaxima(Mat image, int i, int j, int* flag)
+  int is_RegionalMinima(Mat image, int i, int j, int* flag)
   { 
     unsigned char val = image.at<uchar>(i,j);
 
@@ -155,7 +155,7 @@ extern "C"
         return 0;
     }
   }
-  void set_RegionalMaxima(Mat& image, int i, int j, double value)
+  void set_RegionalMinima(Mat& image, int i, int j, double value)
   {  
     unsigned char val = (unsigned char) value;
     image.at<uchar>(i-1,j-1) = val;
@@ -169,7 +169,7 @@ extern "C"
     image.at<uchar>(i,j)     = val;
   }
 
-  unsigned char get_SNeighbour(Mat image, int i, int j)
+  unsigned char get_sneighbour(Mat image, int i, int j)
   {
     return ((unsigned char) (image.at<uchar>(i-1,j) +
                              image.at<uchar>(i+1,j) +
@@ -177,7 +177,7 @@ extern "C"
                              image.at<uchar>(i,j+1))/4);
   }
 
-  unsigned char get_Neighbour(Mat image, int i, int j)
+  unsigned char get_neighbour(Mat image, int i, int j)
   {
     return ((unsigned char) (image.at<uchar>(i,j-2) +
                              image.at<uchar>(i+2,j) +

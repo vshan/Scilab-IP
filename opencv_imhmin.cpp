@@ -1,9 +1,9 @@
 /********************************************************
 Author: Vinay Bhat
 ********************************************************
-Usage: return_image = imextendedmax(input_image, h)
+Usage: return_image = imhmax(input_image, h)
 Example:
-  im = imextendedmax(image, 80)
+  im = imhmax(image, 80)
 ********************************************************/
 
 #include <numeric>
@@ -22,12 +22,12 @@ extern "C"
   #include "sciprint.h"
   #include "../common.h"
   
-  int is_RegionalMaxima(Mat, int, int, int*);
-  void set_RegionalMaxima(Mat&, int, int, double);
-  unsigned char get_SNeighbour(Mat, int, int);
-  unsigned char get_Neighbour(Mat, int, int);
+  int isRegionalMinima(Mat, int, int, int*);
+  void setRegionalMinima(Mat&, int, int, double);
+  unsigned char getsneighbour(Mat, int, int);
+  unsigned char getneighbour(Mat, int, int);
 
-  int opencv_imextendedmax(char *fname, unsigned long fname_len)
+  int opencv_imhmax(char *fname, unsigned long fname_len)
   {
 
     SciErr sciErr;
@@ -67,38 +67,40 @@ extern "C"
         return 0;
     }
     
-    Mat gray_image, fin_image;
+    Mat gray_image;
     cvtColor(image, gray_image, CV_BGR2GRAY);
-
-    fin_image = Mat::zeros(gray_image.size(), gray_image.type());
 
     for (i = 0; i < gray_image.cols-2; i++)
     {
         for (j = 0; j < gray_image.rows-2; j++)
         {   val = gray_image.at<uchar>(i,j);
-            if (is_RegionalMaxima(gray_image, i, j, &flag))
+            if (isRegionalMinima(gray_image, i, j, &flag))
             {   
                if (flag)
                {
-                  unsigned char v = get_Neighbour(gray_image, i, j);
-                  if ((val - v) > h)
-                    set_RegionalMaxima(fin_image, i, j, 255);
+                  unsigned char v = getneighbour(gray_image, i, j);
+                  if ((val + h) < v)
+                    setRegionalMinima(gray_image, i, j, (val+h));
+                  else
+                    setRegionalMinima(gray_image, i, j, v);
                }
                else
                {
-                  unsigned char v = get_SNeighbour(gray_image, i, j);
-                  if ((val - v) > h)
-                    fin_image.at<uchar>(i,j) = 255;
+                  unsigned char v = getsneighbour(gray_image, i, j);
+                  if ((val + h) < v)
+                    gray_image.at<uchar>(i,j) += (unsigned char) h;
+                  else
+                    gray_image.at<uchar>(i,j) = v;
                }
             }
         }
     }
 
-    string tempstring = type2str(fin_image.type());
+    string tempstring = type2str(gray_image.type());
     char *checker;
     checker = (char *)malloc(tempstring.size() + 1);
     memcpy(checker, tempstring.c_str(), tempstring.size() + 1);
-    returnImage(checker, fin_image, 1);
+    returnImage(checker, gray_image, 1);
     free(checker);
 
     //Assigning the list as the Output Variable
@@ -108,14 +110,14 @@ extern "C"
     return 0;
 
   }
-  int is_RegionalMaxima(Mat image, int i, int j, int* flag)
+  int isRegionalMinima(Mat image, int i, int j, int* flag)
   { 
     unsigned char val = image.at<uchar>(i,j);
 
-    if ((image.at<uchar>(i-1,j) < val) &&
-        (image.at<uchar>(i+1,j) < val) &&
-        (image.at<uchar>(i,j-1) < val) &&
-        (image.at<uchar>(i,j+1) < val))
+    if ((image.at<uchar>(i-1,j) > val) &&
+        (image.at<uchar>(i+1,j) > val) &&
+        (image.at<uchar>(i,j-1) > val) &&
+        (image.at<uchar>(i,j+1) > val))
     {
         *flag = 0;
         return 1;
@@ -130,22 +132,22 @@ extern "C"
         (image.at<uchar>(i-1,j+1) == val) &&
         (image.at<uchar>(i,j+1)   == val) &&
         (image.at<uchar>(i+1,j+1) == val) &&
-        (image.at<uchar>(i-2,j-2)  < val) &&
-        (image.at<uchar>(i-1,j-2)  < val) &&
-        (image.at<uchar>(i,j-2)    < val) &&
-        (image.at<uchar>(i+1,j-2)  < val) &&
-        (image.at<uchar>(i+2,j-2)  < val) &&
-        (image.at<uchar>(i-2,j+2)  < val) &&
-        (image.at<uchar>(i-1,j+2)  < val) &&
-        (image.at<uchar>(i,j+2)    < val) &&
-        (image.at<uchar>(i+1,j+2)  < val) &&
-        (image.at<uchar>(i+2,j+2)  < val) &&
-        (image.at<uchar>(i-2,j-1)  < val) &&
-        (image.at<uchar>(i-2,j)    < val) &&
-        (image.at<uchar>(i-2,j+1)  < val) &&
-        (image.at<uchar>(i+2,j-1)  < val) &&
-        (image.at<uchar>(i+2,j)    < val) &&
-        (image.at<uchar>(i+2,j+1)  < val))
+        (image.at<uchar>(i-2,j-2)  > val) &&
+        (image.at<uchar>(i-1,j-2)  > val) &&
+        (image.at<uchar>(i,j-2)    > val) &&
+        (image.at<uchar>(i+1,j-2)  > val) &&
+        (image.at<uchar>(i+2,j-2)  > val) &&
+        (image.at<uchar>(i-2,j+2)  > val) &&
+        (image.at<uchar>(i-1,j+2)  > val) &&
+        (image.at<uchar>(i,j+2)    > val) &&
+        (image.at<uchar>(i+1,j+2)  > val) &&
+        (image.at<uchar>(i+2,j+2)  > val) &&
+        (image.at<uchar>(i-2,j-1)  > val) &&
+        (image.at<uchar>(i-2,j)    > val) &&
+        (image.at<uchar>(i-2,j+1)  > val) &&
+        (image.at<uchar>(i+2,j-1)  > val) &&
+        (image.at<uchar>(i+2,j)    > val) &&
+        (image.at<uchar>(i+2,j+1)  > val))
     {
         *flag = 1;
         return 1;
@@ -155,7 +157,7 @@ extern "C"
         return 0;
     }
   }
-  void set_RegionalMaxima(Mat& image, int i, int j, double value)
+  void setRegionalMinima(Mat& image, int i, int j, double value)
   {  
     unsigned char val = (unsigned char) value;
     image.at<uchar>(i-1,j-1) = val;
@@ -169,7 +171,7 @@ extern "C"
     image.at<uchar>(i,j)     = val;
   }
 
-  unsigned char get_SNeighbour(Mat image, int i, int j)
+  unsigned char getsneighbour(Mat image, int i, int j)
   {
     return ((unsigned char) (image.at<uchar>(i-1,j) +
                              image.at<uchar>(i+1,j) +
@@ -177,7 +179,7 @@ extern "C"
                              image.at<uchar>(i,j+1))/4);
   }
 
-  unsigned char get_Neighbour(Mat image, int i, int j)
+  unsigned char getneighbour(Mat image, int i, int j)
   {
     return ((unsigned char) (image.at<uchar>(i,j-2) +
                              image.at<uchar>(i+2,j) +
