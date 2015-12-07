@@ -1,9 +1,9 @@
 /********************************************************
 Author: Vinay Bhat
 ********************************************************
-Usage: return_image = imhmax(input_image, h)
+Usage: return_image = imhmin(input_image, h)
 Example:
-  im = imhmax(image, 80)
+  im = imhmin(image, 80)
 ********************************************************/
 
 #include <numeric>

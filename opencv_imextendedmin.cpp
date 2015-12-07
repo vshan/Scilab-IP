@@ -1,9 +1,9 @@
 /********************************************************
 Author: Vinay Bhat
 ********************************************************
-Usage: return_image = imextendedmax(input_image, h)
+Usage: return_image = imextendedmin(input_image, h)
 Example:
-  im = imextendedmax(image, 80)
+  im = imextendedmin(image, 80)
 ********************************************************/
 
 #include <numeric>
@@ -81,14 +81,14 @@ extern "C"
                if (flag)
                {
                   unsigned char v = get_neighbour(gray_image, i, j);
-                  if ((val - v) > h)
-                    set_RegionalMinima(fin_image, i, j, 255);
+                  if ((val + h) < v)
+                    set_RegionalMinima(fin_image, i, j, 1);
                }
                else
                {
                   unsigned char v = get_sneighbour(gray_image, i, j);
-                  if ((val - v) > h)
-                    fin_image.at<uchar>(i,j) = 255;
+                  if ((val + h) < v)
+                    fin_image.at<uchar>(i,j) = 1;
                }
             }
         }
