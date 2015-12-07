@@ -70,7 +70,6 @@ extern "C"
     Mat gray_image;
     cvtColor(image, gray_image, CV_BGR2GRAY);
 
-    fin_image = Mat::zeros(gray_image.size(), gray_image.type());
     for (i = 0; i < gray_image.cols-2; i++)
     {
         for (j = 0; j < gray_image.rows-2; j++)
