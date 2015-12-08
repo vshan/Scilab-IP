@@ -21,11 +21,8 @@ extern "C"
   #include <localization.h>
   #include "sciprint.h"
   #include "../common.h"
-  
-  int is_RegionalMinima(Mat, int, int, int*);
-  void set_RegionalMinima(Mat&, int, int, double);
-  unsigned char get_sneighbour(Mat, int, int);
-  unsigned char get_neighbour(Mat, int, int);
+
+  void imextendedmin_imreconstruct(Mat, Mat, Mat&);
 
   int opencv_imextendedmin(char *fname, unsigned long fname_len)
   {
@@ -34,9 +31,6 @@ extern "C"
     int intErr = 0;
     int *piAddr = NULL;
     double h;
-    unsigned char val;
-    int i, j;
-    int flag;
 
     //checking input argument
     CheckInputArgument(pvApiCtx, 2, 2);
@@ -46,7 +40,7 @@ extern "C"
     Mat image;
     retrieveImage(image, 1);
 
-    // Get the address of 2nd argument, the H-Maxima transform
+    // Get the address of 2nd argument, the H-Minima transform scalar
     sciErr = getVarAddressFromPosition(pvApiCtx, 2, &piAddr);
     if (sciErr.iErr)
     {
@@ -54,7 +48,7 @@ extern "C"
         return 0;
     }
 
-    // Get the H-Maxima transform scalar
+    // Get the H-Minima transform scalar
     intErr = getScalarDouble(pvApiCtx, piAddr, &h);
     if(intErr)
     {
@@ -63,36 +57,19 @@ extern "C"
 
     if (h < 0)
     {
-        sciprint("Please enter a nonnegative scalar for H-maxima transform.\n");
+        sciprint("Please enter a nonnegative scalar for H-minima transform.\n");
         return 0;
     }
     
-    Mat gray_image, fin_image;
+    Mat gray_image, dst, fin_image, m, m2;
     cvtColor(image, gray_image, CV_BGR2GRAY);
+    min((gray_image + h), 255, m);
+    imextendedmin_imreconstruct(gray_image, m, dst);
+    add(dst, 1, m2);
+    imextendedmin_imreconstruct(dst, m2, m);
+    subtract(m, dst, m2);
+    fin_image = m2 * 255;
 
-    fin_image = Mat::zeros(gray_image.size(), gray_image.type());
-
-    for (i = 0; i < gray_image.cols-2; i++)
-    {
-        for (j = 0; j < gray_image.rows-2; j++)
-        {   val = gray_image.at<uchar>(i,j);
-            if (is_RegionalMinima(gray_image, i, j, &flag))
-            {   
-               if (flag)
-               {
-                  unsigned char v = get_neighbour(gray_image, i, j);
-                  if ((val + h) < v)
-                    set_RegionalMinima(fin_image, i, j, 1);
-               }
-               else
-               {
-                  unsigned char v = get_sneighbour(gray_image, i, j);
-                  if ((val + h) < v)
-                    fin_image.at<uchar>(i,j) = 1;
-               }
-            }
-        }
-    }
 
     string tempstring = type2str(fin_image.type());
     char *checker;
@@ -108,81 +85,16 @@ extern "C"
     return 0;
 
   }
-  int is_RegionalMinima(Mat image, int i, int j, int* flag)
-  { 
-    unsigned char val = image.at<uchar>(i,j);
-
-    if ((image.at<uchar>(i-1,j) < val) &&
-        (image.at<uchar>(i+1,j) < val) &&
-        (image.at<uchar>(i,j-1) < val) &&
-        (image.at<uchar>(i,j+1) < val))
-    {
-        *flag = 0;
-        return 1;
-    }
-
-
-    if ((image.at<uchar>(i-1,j-1) == val) &&
-        (image.at<uchar>(i,j-1)   == val) &&
-        (image.at<uchar>(i+1,j-1) == val) &&
-        (image.at<uchar>(i-1,j)   == val) &&
-        (image.at<uchar>(i+1,j)   == val) &&
-        (image.at<uchar>(i-1,j+1) == val) &&
-        (image.at<uchar>(i,j+1)   == val) &&
-        (image.at<uchar>(i+1,j+1) == val) &&
-        (image.at<uchar>(i-2,j-2)  < val) &&
-        (image.at<uchar>(i-1,j-2)  < val) &&
-        (image.at<uchar>(i,j-2)    < val) &&
-        (image.at<uchar>(i+1,j-2)  < val) &&
-        (image.at<uchar>(i+2,j-2)  < val) &&
-        (image.at<uchar>(i-2,j+2)  < val) &&
-        (image.at<uchar>(i-1,j+2)  < val) &&
-        (image.at<uchar>(i,j+2)    < val) &&
-        (image.at<uchar>(i+1,j+2)  < val) &&
-        (image.at<uchar>(i+2,j+2)  < val) &&
-        (image.at<uchar>(i-2,j-1)  < val) &&
-        (image.at<uchar>(i-2,j)    < val) &&
-        (image.at<uchar>(i-2,j+1)  < val) &&
-        (image.at<uchar>(i+2,j-1)  < val) &&
-        (image.at<uchar>(i+2,j)    < val) &&
-        (image.at<uchar>(i+2,j+1)  < val))
-    {
-        *flag = 1;
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-  }
-  void set_RegionalMinima(Mat& image, int i, int j, double value)
-  {  
-    unsigned char val = (unsigned char) value;
-    image.at<uchar>(i-1,j-1) = val;
-    image.at<uchar>(i,j-1)   = val;
-    image.at<uchar>(i+1,j-1) = val;
-    image.at<uchar>(i-1,j)   = val;
-    image.at<uchar>(i+1,j)   = val;
-    image.at<uchar>(i-1,j+1) = val;
-    image.at<uchar>(i,j+1)   = val;
-    image.at<uchar>(i+1,j+1) = val;
-    image.at<uchar>(i,j)     = val;
-  }
-
-  unsigned char get_sneighbour(Mat image, int i, int j)
+  void imextendedmin_imreconstruct(Mat g, Mat f, Mat& dest)
   {
-    return ((unsigned char) (image.at<uchar>(i-1,j) +
-                             image.at<uchar>(i+1,j) +
-                             image.at<uchar>(i,j-1) +
-                             image.at<uchar>(i,j+1))/4);
-  }
-
-  unsigned char get_neighbour(Mat image, int i, int j)
-  {
-    return ((unsigned char) (image.at<uchar>(i,j-2) +
-                             image.at<uchar>(i+2,j) +
-                             image.at<uchar>(i,j+2) +
-                             image.at<uchar>(i-2,j))/4);
+    Mat m0, m1, m;
+    m1 = f;
+    do {
+      m0 = m1.clone();
+      erode(m0, m, Mat());
+      max(g, m, m1);
+    } while(countNonZero(m1 != m0) != 0);
+    dest = m1.clone();
   }
 /* ==================================================================== */
 }

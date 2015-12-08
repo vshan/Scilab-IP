@@ -21,11 +21,8 @@ extern "C"
   #include <localization.h>
   #include "sciprint.h"
   #include "../common.h"
-  
-  int isRegionalMaxima(Mat, int, int, int*);
-  void setRegionalMaxima(Mat&, int, int, double);
-  unsigned char getSNeighbour(Mat, int, int);
-  unsigned char getNeighbour(Mat, int, int);
+
+  void imhmax_imreconstruct(Mat, Mat, Mat&);
 
   int opencv_imhmax(char *fname, unsigned long fname_len)
   {
@@ -34,9 +31,6 @@ extern "C"
     int intErr = 0;
     int *piAddr = NULL;
     double h;
-    unsigned char val;
-    int i, j;
-    int flag;
 
     //checking input argument
     CheckInputArgument(pvApiCtx, 2, 2);
@@ -46,7 +40,7 @@ extern "C"
     Mat image;
     retrieveImage(image, 1);
 
-    // Get the address of 2nd argument, the H-Maxima transform
+    // Get the address of 2nd argument, the H-Maxima transform scalar
     sciErr = getVarAddressFromPosition(pvApiCtx, 2, &piAddr);
     if (sciErr.iErr)
     {
@@ -67,40 +61,16 @@ extern "C"
         return 0;
     }
     
-    Mat gray_image;
+    Mat gray_image, m, dst;
     cvtColor(image, gray_image, CV_BGR2GRAY);
-
-    for (i = 0; i < gray_image.cols-2; i++)
-    {
-        for (j = 0; j < gray_image.rows-2; j++)
-        {   val = gray_image.at<uchar>(i,j);
-            if (isRegionalMaxima(gray_image, i, j, &flag))
-            {   
-               if (flag)
-               {
-                  unsigned char v = getNeighbour(gray_image, i, j);
-                  if ((val - v) > h)
-                    setRegionalMaxima(gray_image, i, j, (val-h));
-                  else
-                    setRegionalMaxima(gray_image, i, j, v);
-               }
-               else
-               {
-                  unsigned char v = getSNeighbour(gray_image, i, j);
-                  if ((val - v) > h)
-                    gray_image.at<uchar>(i,j) -= (unsigned char) h;
-                  else
-                    gray_image.at<uchar>(i,j) = v;
-               }
-            }
-        }
-    }
-
-    string tempstring = type2str(gray_image.type());
+    max((gray_image-h), 0, m);
+    imhmax_imreconstruct(gray_image, m, dst);
+    
+    string tempstring = type2str(dst.type());
     char *checker;
     checker = (char *)malloc(tempstring.size() + 1);
     memcpy(checker, tempstring.c_str(), tempstring.size() + 1);
-    returnImage(checker, gray_image, 1);
+    returnImage(checker, dst, 1);
     free(checker);
 
     //Assigning the list as the Output Variable
@@ -110,81 +80,17 @@ extern "C"
     return 0;
 
   }
-  int isRegionalMaxima(Mat image, int i, int j, int* flag)
-  { 
-    unsigned char val = image.at<uchar>(i,j);
-
-    if ((image.at<uchar>(i-1,j) < val) &&
-        (image.at<uchar>(i+1,j) < val) &&
-        (image.at<uchar>(i,j-1) < val) &&
-        (image.at<uchar>(i,j+1) < val))
-    {
-        *flag = 0;
-        return 1;
-    }
-
-
-    if ((image.at<uchar>(i-1,j-1) == val) &&
-        (image.at<uchar>(i,j-1)   == val) &&
-        (image.at<uchar>(i+1,j-1) == val) &&
-        (image.at<uchar>(i-1,j)   == val) &&
-        (image.at<uchar>(i+1,j)   == val) &&
-        (image.at<uchar>(i-1,j+1) == val) &&
-        (image.at<uchar>(i,j+1)   == val) &&
-        (image.at<uchar>(i+1,j+1) == val) &&
-        (image.at<uchar>(i-2,j-2)  < val) &&
-        (image.at<uchar>(i-1,j-2)  < val) &&
-        (image.at<uchar>(i,j-2)    < val) &&
-        (image.at<uchar>(i+1,j-2)  < val) &&
-        (image.at<uchar>(i+2,j-2)  < val) &&
-        (image.at<uchar>(i-2,j+2)  < val) &&
-        (image.at<uchar>(i-1,j+2)  < val) &&
-        (image.at<uchar>(i,j+2)    < val) &&
-        (image.at<uchar>(i+1,j+2)  < val) &&
-        (image.at<uchar>(i+2,j+2)  < val) &&
-        (image.at<uchar>(i-2,j-1)  < val) &&
-        (image.at<uchar>(i-2,j)    < val) &&
-        (image.at<uchar>(i-2,j+1)  < val) &&
-        (image.at<uchar>(i+2,j-1)  < val) &&
-        (image.at<uchar>(i+2,j)    < val) &&
-        (image.at<uchar>(i+2,j+1)  < val))
-    {
-        *flag = 1;
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-  }
-  void setRegionalMaxima(Mat& image, int i, int j, double value)
-  {  
-    unsigned char val = (unsigned char) value;
-    image.at<uchar>(i-1,j-1) = val;
-    image.at<uchar>(i,j-1)   = val;
-    image.at<uchar>(i+1,j-1) = val;
-    image.at<uchar>(i-1,j)   = val;
-    image.at<uchar>(i+1,j)   = val;
-    image.at<uchar>(i-1,j+1) = val;
-    image.at<uchar>(i,j+1)   = val;
-    image.at<uchar>(i+1,j+1) = val;
-    image.at<uchar>(i,j)     = val;
-  }
-
-  unsigned char getSNeighbour(Mat image, int i, int j)
+  void imhmax_imreconstruct(Mat g, Mat f, Mat& dest)
   {
-    return ((unsigned char) (image.at<uchar>(i-1,j) +
-                             image.at<uchar>(i+1,j) +
-                             image.at<uchar>(i,j-1) +
-                             image.at<uchar>(i,j+1))/4);
-  }
+    Mat m0, m1, m;
+    m1 = f;
+    do {
+      m0 = m1.clone();
+      dilate(m0, m, Mat());
+      min(g, m, m1);
+    } while(countNonZero(m1 != m0) != 0);
+    dest = m1.clone();
+  }  
 
-  unsigned char getNeighbour(Mat image, int i, int j)
-  {
-    return ((unsigned char) (image.at<uchar>(i,j-2) +
-                             image.at<uchar>(i+2,j) +
-                             image.at<uchar>(i,j+2) +
-                             image.at<uchar>(i-2,j))/4);
-  }
 /* ==================================================================== */
 }
