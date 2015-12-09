@@ -1,11 +1,11 @@
 /********************************************************
 Author: Vinay Bhat
 ********************************************************
-Usage: return_image = regionfill(input_image, column_list, row_list)
-       return_image = regionfill(input_image, mask)
+Usage: return_image = roifill(input_image, column_list, row_list)
+       return_image = roifill(input_image, mask)
 Example:
-  im = regionfill(image, [0 100 100 0], [0 0 100 100])
-  im = regionfill(image, mask)
+  im = roifill(image, [0 100 100 0], [0 0 100 100])
+  im = roifill(image, mask)
 ********************************************************/
 
 #include <numeric>
@@ -24,7 +24,7 @@ extern "C"
   #include "sciprint.h"
   #include "../common.h"
 
-  int opencv_regionfill(char *fname, unsigned long fname_len)
+  int opencv_roifill(char *fname, unsigned long fname_len)
   {
 
     SciErr sciErr;
@@ -42,9 +42,9 @@ extern "C"
     CheckOutputArgument(pvApiCtx, 1, 1);
 
     // Get the input image from the Scilab environment
-    Mat image, mask, mask_orig, fin_image;
-    retrieveImage(image, 1);
-
+    Mat image, image_orig, mask, fin_image;
+    retrieveImage(image_orig, 1);
+    cvtColor(image_orig, image, CV_BGR2GRAY);
 
     if (nbInputArgument(pvApiCtx) == 2)
     {   
@@ -143,8 +143,7 @@ extern "C"
         int npt[] = { number_of_points };
 
         // Create a new, black, blank image same size as of input
-        mask_orig = Mat::zeros(image.size(), image.type());
-        cvtColor(mask_orig, mask, CV_BGR2GRAY);
+        mask = Mat::zeros(image.size(), image.type());
 
         // Call the fillPoly OpenCV function
         // Fill the blank image in the polygon specified
