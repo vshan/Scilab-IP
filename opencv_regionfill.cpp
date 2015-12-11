@@ -48,13 +48,13 @@ extern "C"
 
     if (nbInputArgument(pvApiCtx) == 2)
     {   
-        retrieveImage(mask, 2);
+        retrieveImage(mask_orig, 2);
 
-        for (int i = 0; i < mask.cols; i++)
+        for (int i = 0; i < mask_orig.cols; i++)
         {
-          for (int j = 0; j < mask.rows; j++)
+          for (int j = 0; j < mask_orig.rows; j++)
           {
-            unsigned char val = mask.at<uchar>(i,j);
+            unsigned char val = mask_orig.at<uchar>(i,j);
             if (!(val == 0 || val == 1 || val == 255))
             {
               sciprint("Please enter binary mask (second argument).");
@@ -62,7 +62,15 @@ extern "C"
             } 
           }
         }
-        
+
+        if (mask_orig.type() != CV_8UC1)
+        {
+          cvtColor(mask_orig, mask, CV_BGR2GRAY);
+        }
+        else
+        {
+          mask = mask_orig.clone();
+        }
     }
     else
     {
@@ -84,7 +92,7 @@ extern "C"
 
         // Get the column list in the form of a matrix 
         // No. of columns = No. of elements in the list
-        // No. of rows = 1
+        // No. of rows = 1 
         sciErr = getMatrixOfDouble(pvApiCtx, piAddr, &iRowsC, &iColsC, &pstDataC);
         if(sciErr.iErr)
         {

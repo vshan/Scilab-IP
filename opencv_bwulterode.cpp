@@ -49,7 +49,14 @@ extern "C"
         } 
       }
     }
-    
+
+    if (gray_image.type() != CV_8UC1)
+    { 
+      Mat temp;
+      temp = gray_image.clone();
+      cvtColor(temp, gray_image, CV_BGR2GRAY);
+    }
+
     distanceTransform(gray_image, image, CV_DIST_L2, DIST_MASK_5);
     subtract(image, 1, gray_image);
     bwulterode_imreconstruct(image, gray_image, m);

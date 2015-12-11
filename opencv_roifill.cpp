@@ -42,25 +42,34 @@ extern "C"
     CheckOutputArgument(pvApiCtx, 1, 1);
 
     // Get the input image from the Scilab environment
-    Mat image, image_orig, mask, fin_image;
+    Mat image, image_orig, mask, fin_image, mask_orig;
     retrieveImage(image_orig, 1);
     cvtColor(image_orig, image, CV_BGR2GRAY);
 
     if (nbInputArgument(pvApiCtx) == 2)
     {   
-        retrieveImage(mask, 2);
+        retrieveImage(mask_orig, 2);
 
-        for (int i = 0; i < mask.cols; i++)
+        for (int i = 0; i < mask_orig.cols; i++)
         {
-          for (int j = 0; j < mask.rows; j++)
+          for (int j = 0; j < mask_orig.rows; j++)
           {
-            unsigned char val = mask.at<uchar>(i,j);
+            unsigned char val = mask_orig.at<uchar>(i,j);
             if (!(val == 0 || val == 1 || val == 255))
             {
               sciprint("Please enter binary mask (second argument).");
               return 0;
             } 
           }
+        }
+
+        if (mask_orig.type() != CV_8UC1)
+        {
+          cvtColor(mask_orig, mask, CV_BGR2GRAY);
+        }
+        else
+        {
+          mask = mask_orig.clone();
         }
         
     }
@@ -150,7 +159,7 @@ extern "C"
         // by the points
         fillPoly(mask, ppt, npt, 1, Scalar(255, 255, 255), lineType);
     }
-
+    
     inpaint(image, mask, fin_image, 3, INPAINT_TELEA);
 
     string tempstring = type2str(fin_image.type());
