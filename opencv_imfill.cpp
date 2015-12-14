@@ -2,6 +2,10 @@
 Author: Vinay Bhat
 ********************************************************
 Usage: return_image = imfill(image)
+       return_image = imfill(image, 'holes')
+       return_image = imfill(image, points)
+Example:
+  im = imfill(image, [1 1; 10 10; 11 12])
 ********************************************************/
 
 #include <numeric>
@@ -73,7 +77,6 @@ extern "C"
         if (strcmp(pstData, "holes") == 0)
         {
           freeAllocatedSingleString(pstData);
-           
           // Floodfill from point (0, 0)
           Mat im_floodfill = image.clone();
           floodFill(im_floodfill, Point(0,0), Scalar(255));
@@ -83,7 +86,9 @@ extern "C"
           bitwise_not(im_floodfill, im_floodfill_inv);
            
           // Combine the two images to get the foreground.
-          dst = (image | im_floodfill_inv);
+          Mat dst2 = (image | im_floodfill_inv);
+          erode(dst2, dst, Mat());
+
         }
         else
         {
