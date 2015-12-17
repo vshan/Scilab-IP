@@ -1,7 +1,7 @@
 /********************************************************
 Author: Vinay Bhat
 ********************************************************
-Usage: return_image = bwdistgeodesic(input_image, mask)
+Usage: return_image = graydist(input_image, mask)
 ********************************************************/
 
 #include <numeric>
@@ -9,6 +9,7 @@ Usage: return_image = bwdistgeodesic(input_image, mask)
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/opencv.hpp"
 #include <iostream>
+#include <limits>
 using namespace cv;
 using namespace std;
 extern "C"
@@ -20,7 +21,7 @@ extern "C"
   #include "sciprint.h"
   #include "../common.h"
 
-  int opencv_bwdistgeodesic(char *fname, unsigned long fname_len)
+  int opencv_graydist(char *fname, unsigned long fname_len)
   {
 
     SciErr sciErr;
@@ -35,39 +36,31 @@ extern "C"
     Mat marker, mask;
     retrieveImage(marker, 1);
     retrieveImage(mask, 2);
-
-    if (marker.type() != CV_8UC1)
-    { 
-      Mat tempM;
-      tempM = marker.clone();
-      cvtColor(tempM, marker, CV_BGR2GRAY);
-    }
-
-    if (mask.type() != CV_8UC1)
-    { 
-      Mat tempM;
-      tempM = mask.clone();
-      cvtColor(tempM, mask, CV_8UC1);
-    }
-
-    int i = 1;
     
-    Mat temp0;
-    Mat temp2 = marker.clone();
-    Mat fin_image = marker.clone();
+    // do conversion of marker to gray
+    // do conversion of mask to gray
 
-    do {
-      temp0 = temp2.clone();
-      Mat temp1, temp3;
-      dilate(temp0, temp1, Mat());
-      min(temp1, mask, temp2);
-      temp3 = temp2 - temp0;
-      temp3.convertTo(temp3, CV_32F);
-      temp3 = temp3 * ((255 - i)/255.0);
-      temp3.convertTo(temp3, CV_8UC1);
-      max(fin_image, temp3, fin_image);
-      i++;
-    } while((countNonZero(temp0 != temp2) != 0) && (i != 255));
+    vector<Point> sources;
+    Mat distances(mask.size(), CV_32F);
+    Mat sptSet = Mat::zeros(mask.size(), CV_8UC1);
+    for (i = 0; i < mask.cols; i++)
+    {
+      for (j = 0; j < mask.rows; j++)
+      {
+        if (mask.at<uchar>(i,j)) {
+          sources.push_back(Point(i,j));
+          distances.at<float>(i,j) = 0.0;
+        }
+        else
+          distances.at<float>(i,j) = FLT_MAX;
+      }
+    }
+
+    for (c = 0; c < mask.cols * mask.rows; c++)
+    {
+      float l = minDistance(distances, sptSet);
+
+    }
 
 
     string tempstring = type2str(fin_image.type());
