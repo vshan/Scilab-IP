@@ -20,8 +20,6 @@ extern "C"
   #include "sciprint.h"
   #include "../common.h"
 
-  void bwulterode_imreconstruct(Mat, Mat, Mat&);
-
   int opencv_bwulterode(char *fname, unsigned long fname_len)
   {
 
@@ -37,6 +35,7 @@ extern "C"
     Mat gray_image, fin_image, m, image;
     retrieveImage(gray_image, 1);
 
+    // Ensure that the image entered is binary in nature
     for (int i = 0; i < gray_image.cols; i++)
     {
       for (int j = 0; j < gray_image.rows; j++)
@@ -50,6 +49,8 @@ extern "C"
       }
     }
 
+    // Check if image is grayscale or not,
+    // if not, then convert it to grayscale
     if (gray_image.type() != CV_8UC1)
     { 
       Mat temp;
@@ -57,10 +58,48 @@ extern "C"
       cvtColor(temp, gray_image, CV_BGR2GRAY);
     }
 
+    // Ultimate erosion is the the regional maxima of the 
+    // euclidean distance transform of the given image.
+
+    // * Algorithm given in the research papers:
+    //  [1] Vincent, L., "Morphological Grayscale Reconstruction 
+    //      in Image Analysis: Applications and Efficient Algorithms,
+    //      " IEEE Transactions on Image Processing, Vol. 2, 
+    //      No. 2, April, 1993.
+    //  [2] Soille, P., Morphological Image Analysis: Principles 
+    //      and Applications, Springer-Verlag, 1999.
+
+    // Take the euclidean distance transform of the given image.
     distanceTransform(gray_image, image, CV_DIST_L2, DIST_MASK_5);
+
+    // Take the regional maxima of the result
+    // by using morphological techniques
     subtract(image, 1, gray_image);
-    bwulterode_imreconstruct(image, gray_image, m);
+
+    /******************************************************
+
+    * Algorithm given in the research papers:
+     [1] Vincent, L., "Morphological Grayscale Reconstruction 
+         in Image Analysis: Applications and Efficient Algorithms,
+         " IEEE Transactions on Image Processing, Vol. 2, 
+         No. 2, April, 1993, pp. 176-201.
+     [2] Soille, P., Morphological Image Analysis: Principles 
+         and Applications, Springer-Verlag, 1999, pp. 170-171.
+
+    * Image reconstruction by dilation uses dilation and
+     suppressing the marker image by the mask, hence the
+     `min`.
+
+    *******************************************************/
+
+    // Function defined in common.cpp
+    imreconstruct_by_dilation(image, gray_image, m);
+    
     subtract(image, m, gray_image);
+
+    // The result is given in the form of a binary image
+    // (0s and 1s)
+    // Scale the image to make it 0s and 255s
     fin_image = gray_image * 255;
 
     string tempstring = type2str(fin_image.type());
@@ -76,17 +115,6 @@ extern "C"
     ReturnArguments(pvApiCtx);
     return 0;
 
-  }
-  void bwulterode_imreconstruct(Mat g, Mat f, Mat& dest)
-  {
-    Mat m0, m1, m;
-    m1 = f;
-    do {
-      m0 = m1.clone();
-      dilate(m0, m, Mat());
-      min(g, m, m1);
-    } while(countNonZero(m1 != m0) != 0);
-    dest = m1.clone();
   }
 /* ==================================================================== */
 }

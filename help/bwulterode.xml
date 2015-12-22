@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0-subset Scilab" xml:id="bwulterode" xml:lang="en_US"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:ns3="http://www.w3.org/1999/xhtml"
+          xmlns:mml="http://www.w3.org/1998/Math/MathML"
+          xmlns:db="http://docbook.org/ns/docbook">
+
+  <refnamediv>
+    <refname>bwulterode</refname>
+
+    <refpurpose>Ultimate erosion of binary image</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <title>Calling Sequence</title>
+
+    <synopsis>output_image = bwulterode(input_image);</synopsis>
+  </refsynopsisdiv>
+  
+  <refsection>
+      <title>Arguments</title>
+    <variablelist>
+      <varlistentry><term>input_image:</term>
+        <listitem><para>The image matrix to which the ultimate erosion has to be applied</para></listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+  
+  <refsection>
+    <title>Description</title>
+    <para>
+       Computes the ultimate erosion of the binary image input_image. The ultimate erosion of input_image consists of the regional maxima of the Euclidean distance transform of the complement of input_image. 
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Example</title>
+    <programlisting role="example"><![CDATA[
+              a = imread("/home/Pictures/img.jpg");
+              b = bwulterode(a);
+              imshow(b);
+      ]]></programlisting>
+  </refsection>
+
+  <refsection>
+    <title>Authors</title>
+
+    <simplelist type="vert">
+      <member>Vinay Bhat</member>
+    </simplelist>
+  </refsection>
+</refentry>

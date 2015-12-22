@@ -42,6 +42,9 @@ extern "C"
     Mat marker, mask;
     retrieveImage(marker, 1);
 
+    // If number of arguments is 3, then column list and
+    // row list are given.
+    // Otherwise mask image is directly given.
     if (nbInputArgument(pvApiCtx) == 3)
     {
        // Get the address of 2nd argument, the column list
@@ -132,6 +135,8 @@ extern "C"
     else
       retrieveImage(mask, 2);
 
+    // Check if the marker image is grayscale or not,
+    // if not, convert it to grayscale.
     if (marker.type() != CV_8UC1)
     { 
       Mat tempM;
@@ -139,6 +144,8 @@ extern "C"
       cvtColor(tempM, marker, CV_BGR2GRAY);
     }
 
+    // Check if the mask image is grayscale or not,
+    // if not, convert it to grayscale.
     if (mask.type() != CV_8UC1)
     { 
       Mat tempM;
@@ -152,6 +159,17 @@ extern "C"
     Mat temp2 = marker.clone();
     Mat fin_image = marker.clone();
 
+    // Image reconstruction techniques are used.
+    /******************************************************
+    * Algorithm given in the research papers:
+    [1] Vincent, L., "Morphological Grayscale Reconstruction 
+       in Image Analysis: Applications and Efficient Algorithms,
+       " IEEE Transactions on Image Processing, Vol. 2, 
+       No. 2, April, 1993, pp. 176-201.
+    [2] Soille, P., Morphological Image Analysis: Principles 
+       and Applications, Springer-Verlag, 1999, pp. 170-171.
+
+    *******************************************************/
     do {
       temp0 = temp2.clone();
       Mat temp1, temp3;
