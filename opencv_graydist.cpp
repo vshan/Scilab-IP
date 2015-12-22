@@ -40,9 +40,35 @@ extern "C"
     // do conversion of marker to gray
     // do conversion of mask to gray
 
+    if (marker.type() != CV_8UC1)
+    {
+      Mat temp = marker.clone();
+      cvtColor(temp, marker, CV_BGR2GRAY);
+    }
+
+    if (mask.type() != CV_8UC1)
+    {
+      Mat temp = mask.clone();
+      cvtColor(temp, mask, CV_BGR2GRAY);
+    }
+
+
     vector<Point> sources;
     Mat distances(mask.size(), CV_32F);
     Mat sptSet = Mat::zeros(mask.size(), CV_8UC1);
+    for (i = 0; i < mask.cols; i++)
+    {
+      for (j = 0; j < mask.rows; j++)
+      {
+        if (mask.at<uchar>(i,j)) {
+          sources.push_back(Point(i,j));
+          distances.at<float>(i,j) = 0.0;
+        }
+        else
+          distances.at<float>(i,j) = FLT_MAX;
+      }
+    }
+
     for (i = 0; i < mask.cols; i++)
     {
       for (j = 0; j < mask.rows; j++)
