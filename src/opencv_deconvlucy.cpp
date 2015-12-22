@@ -39,8 +39,14 @@ extern "C"
     retrieveImage(image, 1);
     retrieveImage(psf, 2);
 
+    // Check if number of arguments are three,
+    // if so, then the number of iterations is also
+    // specified.
+    // If not, then set number of iterations as
+    // ten.
     if (nbInputArgument(pvApiCtx) == 3)
     {
+      // Get the address of the iterations scalar
       sciErr = getVarAddressFromPosition(pvApiCtx, 3, &piAddr);
       if (sciErr.iErr)
       {
@@ -64,6 +70,8 @@ extern "C"
     else 
       h = 10;
 
+    // Check if the input image is grayscale or not,
+    // if not, convert it to grayscale.
     if (image.type() != CV_8UC1)
     {
       Mat temp;
@@ -71,6 +79,8 @@ extern "C"
       cvtColor(temp, image, CV_BGR2GRAY);
     }
 
+    // Check if the PSF is grayscale or not,
+    // if not, convert it to grayscale.
     if (psf.type() != CV_8UC1)
     {
       Mat temp;
@@ -78,6 +88,8 @@ extern "C"
       cvtColor(temp, psf, CV_BGR2GRAY);
     }
 
+    // Apply the Lucy-Richardson method for deblurring
+    // an image.
     Mat convRes, convRes2, temp;
     temp = image.clone();
     for (i = 0; i < h; i++)
