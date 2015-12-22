@@ -2,6 +2,7 @@
 Author: Vinay Bhat
 ********************************************************
 Usage: return_image = bwdistgeodesic(input_image, mask)
+                      bwdistgeodesic(input_image, column_list, row_list)
 ********************************************************/
 
 #include <numeric>
@@ -25,16 +26,111 @@ extern "C"
 
     SciErr sciErr;
     int intErr = 0;
+    int iRowsR=0,iColsR=0,iColsC=0,iRowsC=0;
     int *piAddr = NULL;
+    int *piAddr2  = NULL;
+    double *pstDataR = NULL;
+    double *pstDataC = NULL;
+    int i, number_of_points;
+    int lineType = 8;
 
     //checking input argument
-    CheckInputArgument(pvApiCtx, 2, 2);
+    CheckInputArgument(pvApiCtx, 2, 3);
     CheckOutputArgument(pvApiCtx, 1, 1);
 
     // Get the input image from the Scilab environment
     Mat marker, mask;
     retrieveImage(marker, 1);
-    retrieveImage(mask, 2);
+
+    if (nbInputArgument(pvApiCtx) == 3)
+    {
+       // Get the address of 2nd argument, the column list
+        sciErr = getVarAddressFromPosition(pvApiCtx, 2, &piAddr);
+        if (sciErr.iErr)
+        {
+            printError(&sciErr, 0);
+            return 0;
+        }
+
+        // Get the address of the 3rd agument, the row list
+        sciErr = getVarAddressFromPosition(pvApiCtx, 3, &piAddr2);
+        if (sciErr.iErr)
+        {
+            printError(&sciErr, 0);
+            return 0;
+        }
+
+        // Get the column list in the form of a matrix 
+        // No. of columns = No. of elements in the list
+        // No. of rows = 1 
+        sciErr = getMatrixOfDouble(pvApiCtx, piAddr, &iRowsC, &iColsC, &pstDataC);
+        if(sciErr.iErr)
+        {
+            printError(&sciErr, 0);
+            return 0;
+        }
+
+        if (iRowsC != 1)
+        {
+            sciprint("Please enter a list of column coordinates.\n");
+            return 0;
+        }
+        
+        // Get the row list in the form of a matrix
+        // No. of columns = No. of elements in the list
+        // No. of rows = 1
+        sciErr = getMatrixOfDouble(pvApiCtx, piAddr2, &iRowsR, &iColsR, &pstDataR);
+        if(sciErr.iErr)
+        {
+            printError(&sciErr, 0);
+            return 0;
+        }
+
+        if (iRowsR != 1)
+        {
+            sciprint("Please enter a list of row coordinates.\n");
+            return 0;
+        }
+
+        if (iColsC != iColsR)
+        {
+            sciprint("Please ensure number of elements in both row and column lists are equal.\n");
+            return 0;
+        }
+
+        // Number of points is number of columns
+        number_of_points = iColsC;
+
+        // Create the n points which define
+        // the polygon
+        Point points[1][number_of_points];
+        
+        for (i = 0; i < number_of_points; i++)
+        {
+            if (pstDataR[i] < 0 || pstDataC[i] < 0)
+            {
+                sciprint("Coordinates cannot be negative.\n");
+                return 0;
+            }
+            else
+                points[0][i] = Point(pstDataR[i], pstDataC[i]);
+        }
+
+        const Point* ppt[1] = { points[0] };
+
+        int npt[] = { number_of_points };
+
+        // Create a new, black, blank image same size as of input
+        mask_orig = Mat::zeros(image.size(), image.type());
+        cvtColor(mask_orig, mask, CV_BGR2GRAY);
+
+        // Call the fillPoly OpenCV function
+        // Fill the blank image in the polygon specified
+        // by the points
+        fillPoly(mask, ppt, npt, 1, Scalar(255, 255, 255), lineType);
+    }
+    else
+      retrieveImage(mask, 2);
 
     if (marker.type() != CV_8UC1)
     { 
