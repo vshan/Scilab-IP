@@ -891,6 +891,27 @@ int returnImage(char *checker,Mat img,int pos)
     
 }
 
+/******************************************************
+ 
+ * Algorithm given in the research papers:
+   [1] Vincent, L., "Morphological Grayscale Reconstruction 
+       in Image Analysis: Applications and Efficient Algorithms,
+       " IEEE Transactions on Image Processing, Vol. 2, 
+       No. 2, April, 1993, pp. 176-201.
+   [2] Soille, P., Morphological Image Analysis: Principles 
+       and Applications, Springer-Verlag, 1999, pp. 170-171.
+
+ * Morphological image reconstruction is a common function
+   used in morphological transformation functions such as
+   imhmax, imhmin, imextendedmin, imextendedmax, imfill,
+   imimposemin
+
+ * Image reconstruction by dilation uses dilation and
+   suppressing the marker image by the mask, hence the
+   `min`.
+
+*******************************************************/
+
 void imreconstruct_by_dilation(Mat g, Mat f, Mat& dest)
 {
   Mat temp0, temp1, m;
@@ -902,6 +923,27 @@ void imreconstruct_by_dilation(Mat g, Mat f, Mat& dest)
   } while(countNonZero(temp1 != temp0) != 0);
   dest = temp1.clone();
 }
+
+/******************************************************
+ 
+ * Algorithm given in the research papers:
+   [1] Vincent, L., "Morphological Grayscale Reconstruction 
+       in Image Analysis: Applications and Efficient Algorithms,
+       " IEEE Transactions on Image Processing, Vol. 2, 
+       No. 2, April, 1993, pp. 176-201.
+   [2] Soille, P., Morphological Image Analysis: Principles 
+       and Applications, Springer-Verlag, 1999, pp. 170-171.
+
+ * Morphological image reconstruction is a common function
+   used in morphological transformation functions such as
+   imhmax, imhmin, imextendedmin, imextendedmax, imfill,
+   imimposemin
+
+ * Image reconstruction by erosion uses erosion and
+   expanding the marker image by the mask, hence the
+   `max`.
+
+*******************************************************/
 
 void imreconstruct_by_erosion(Mat g, Mat f, Mat& dest)
 {
