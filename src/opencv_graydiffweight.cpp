@@ -44,12 +44,19 @@ extern "C"
     Mat image;
     retrieveImage(image, 1);
 
+    // Check if the image is grayscale or not,
+    // if not, convert it to grayscale.
     if (image.type() != CV_8UC1)
     {
       Mat temp = image.clone();
       cvtColor(temp, image, CV_BGR2GRAY);
     }
 
+    // Check if the number of arguments are 2,
+    // if so, then either the reference gray value
+    // has been given, or mask image is provided.
+    // If not 2, then column list and row list is
+    // provided.
     if (nbInputArgument(pvApiCtx) == 2)
     {
       sciErr = getVarAddressFromPosition(pvApiCtx, 2, &piAddr);
@@ -71,14 +78,21 @@ extern "C"
           return 0;
         }
       }
-      else
+      else // The mask image has been given.
       {
         retrieveImage(mask, 2);
+
+        // Check if the mask is grayscale or not,
+        // if not, convert it to grayscale.
         if (mask.type() != CV_8UC1)
         {
           Mat temp = mask.clone();
           cvtColor(temp, mask, CV_BGR2GRAY);
         }
+
+        // Compute the average of the values 
+        // specified by the mask (wherever it is non-zero),
+        // then use it as reference gray value.
         float sum, count;
         sum = count = 0.0;
         for (i = 0; i < image.cols; i++)
@@ -173,6 +187,10 @@ extern "C"
     }
     
     Mat fin_image;
+
+    // With the reference gray value computed, find the 
+    // absolute difference between the image and 
+    // the reference gray value scalar.
     absdiff(image, refGrayVal, temp);
 
     string tempstring = type2str(fin_image.type());

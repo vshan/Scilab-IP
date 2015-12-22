@@ -31,7 +31,7 @@
   <refsection>
     <title>Description</title>
     <para>
-       Computes the ultimate erosion of the binary image input_image. The ultimate erosion of input_image consists of the regional maxima of the Euclidean distance transform of the complement of input_image. 
+       This function computes the ultimate erosion of the binary image input_image. The ultimate erosion of input_image consists of the regional maxima of the Euclidean distance transform of the complement of input_image. 
     </para>
   </refsection>
 

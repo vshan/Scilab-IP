@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0-subset Scilab" xml:id="graydiffweight" xml:lang="en_US"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:ns3="http://www.w3.org/1999/xhtml"
+          xmlns:mml="http://www.w3.org/1998/Math/MathML"
+          xmlns:db="http://docbook.org/ns/docbook">
+
+  <refnamediv>
+    <refname>graydiffweight</refname>
+
+    <refpurpose>Calculate weights for image pixels based on grayscale intensity difference</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <title>Calling Sequence</title>
+
+    <synopsis>return_image = graydiffweight(input_image, refGrayVal);</synopsis>
+    <synopsis>return_image = graydiffweight(input_image, mask);</synopsis>
+    <synopsis>return_image = graydiffweight(input_image, column_list, row_list);</synopsis>
+  </refsynopsisdiv>
+  
+  <refsection>
+      <title>Arguments</title>
+    <variablelist>
+      <varlistentry><term>input_image:</term>
+        <listitem><para>The image matrix of which the gray difference weight has to be computed</para></listitem>
+      </varlistentry>
+      <varlistentry><term>refGrayVal:</term>
+        <listitem><para>Scalar specifying the reference gray value</para></listitem>
+      </varlistentry>
+      <varlistentry><term>mask:</term>
+        <listitem><para>The binary image which specifies the locations to find average reference gray value</para></listitem>
+      </varlistentry>
+      <varlistentry><term>column_list:</term>
+        <listitem><para>List containing the column indices of rgv locations</para></listitem>
+      </varlistentry>
+      <varlistentry><term>row_list:</term>
+        <listitem><para>List containing the row indices of rgv locations</para></listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+  
+  <refsection>
+    <title>Description</title>
+    <para>
+        This function computes the pixel weight for each pixel in the grayscale image input_image. The weight is the absolute value of the difference between the intensity of the pixel and the reference grayscale intensity specified by the scalar refGrayVal. 
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Example</title>
+    <programlisting role="example"><![CDATA[
+              a = imread("/home/Pictures/img.jpg");
+              rgv = 100.0;
+              b = graydiffweight(a, rgv);
+              imshow(b);
+      ]]></programlisting>
+    <programlisting role="example"><![CDATA[
+              a = imread("/home/Pictures/img.jpg");
+              mask = imread("/home/Pictures/mask.jpg");
+              b = graydiffweight(a, mask);
+              imshow(b);
+      ]]></programlisting>
+      <programlisting role="example"><![CDATA[
+              a = imread("/home/Pictures/img.jpg");
+              b = graydiffweight(a, [0 10], [0 10]);
+              imshow(b);
+      ]]></programlisting>
+  </refsection>
+
+  <refsection>
+    <title>Authors</title>
+
+    <simplelist type="vert">
+      <member>Vinay Bhat</member>
+    </simplelist>
+  </refsection>
+</refentry>

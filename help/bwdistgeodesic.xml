@@ -41,7 +41,7 @@
   <refsection>
     <title>Description</title>
     <para>
-       Computes the geodesic distance transform, given the binary image input_image and the seed locations specified by mask. Regions where input_image is true represent valid regions that can be traversed in the computation of the distance transform. Regions where input_image is false represent constrained regions that cannot be traversed in the distance computation. 
+       This function computes the geodesic distance transform, given the binary image input_image and the seed locations specified by mask. Regions where input_image is 1 or 255 represent valid regions that can be traversed in the computation of the distance transform. Regions where input_image is 0 represent constrained regions that cannot be traversed in the distance computation. 
     </para>
   </refsection>
 
