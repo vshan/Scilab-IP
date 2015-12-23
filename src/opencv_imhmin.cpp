@@ -21,8 +21,6 @@ extern "C"
   #include <localization.h>
   #include "sciprint.h"
   #include "../common.h"
-
-  void imhmin_imreconstruct(Mat, Mat, Mat&);
   
   int opencv_imhmin(char *fname, unsigned long fname_len)
   {
@@ -64,7 +62,33 @@ extern "C"
     Mat gray_image, m, dst;
     cvtColor(image, gray_image, CV_BGR2GRAY);
     min((gray_image+h), 255, m);
-    imhmin_imreconstruct(gray_image, m, dst);
+
+    // The h-minima transform function is a morphological operation
+    // as defined in the following research papers:
+
+    /******************************************************
+
+      * Algorithm given in the research papers:
+       [1] Vincent, L., "Morphological Grayscale Reconstruction 
+           in Image Analysis: Applications and Efficient Algorithms,
+           " IEEE Transactions on Image Processing, Vol. 2, 
+           No. 2, April, 1993, pp. 176-201.
+       [2] Soille, P., Morphological Image Analysis: Principles 
+           and Applications, Springer-Verlag, 1999, pp. 170-171.
+
+      * Morphological image reconstruction is a common function
+       used in morphological transformation functions such as
+       imhmax, imhmin, imextendedmin, imextendedmax, imfill,
+       imimposemin
+
+      * Image reconstruction by erosion uses erosion and
+       expanding the marker image by the mask, hence the
+       `max`.
+
+    ********************************************************/
+
+    // defined in common.c
+    imreconstruct_by_erosion(gray_image, m, dst);
     
     string tempstring = type2str(dst.type());
     char *checker;
@@ -80,17 +104,6 @@ extern "C"
     return 0;
 
   }
-  void imhmin_imreconstruct(Mat g, Mat f, Mat& dest)
-  {
-    Mat m0, m1, m;
-    m1 = f;
-    do {
-      m0 = m1.clone();
-      erode(m0, m, Mat());
-      max(g, m, m1);
-    } while(countNonZero(m1 != m0) != 0);
-    dest = m1.clone();
-  }  
 
 /* ==================================================================== */
 }
