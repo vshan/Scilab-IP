@@ -23,8 +23,6 @@ extern "C"
   #include <localization.h>
   #include "sciprint.h"
   #include "../common.h"
-
-  void imfill_imreconstruct(Mat, Mat, Mat&);
   
   int opencv_imfill(char *fname, unsigned long fname_len)
   {
@@ -46,6 +44,10 @@ extern "C"
     Mat image, dst;
     retrieveImage(image, 1);
 
+    // Check if the number of arguments passed is 2,
+    // if so then check if it's a string that says 'holes'
+    // or if it's a matrix containing the points.
+    // If not 2, then just the image is passed.
     if (nbInputArgument(pvApiCtx) == 2)
     {
       sciErr = getVarAddressFromPosition(pvApiCtx, 2, &piAddr);
@@ -54,7 +56,9 @@ extern "C"
         printError(&sciErr, 0);
         return 0;
       }
-
+      
+      // Check if the marker image is grayscale or not,
+      // if not, convert it to grayscale.
       if (image.type() != CV_8UC1)
       { 
         Mat temp;
@@ -62,10 +66,12 @@ extern "C"
         cvtColor(temp, image, CV_BGR2GRAY);
       }
 
+      // If it's string
       if(isStringType(pvApiCtx, piAddr))
       {
         char* pstData = NULL;
-
+        
+        // Get the string from the Scilab environment
         iRet = getAllocatedSingleString(pvApiCtx, piAddr, &pstData);
         
         if(iRet)
@@ -73,7 +79,8 @@ extern "C"
           freeAllocatedSingleString(pstData);
           return iRet;
         }
-
+        
+        // Does the string say 'holes' ?
         if (strcmp(pstData, "holes") == 0)
         {
           freeAllocatedSingleString(pstData);
@@ -132,6 +139,33 @@ extern "C"
     }
     else
     {
+
+      /*
+      The fill operation on a grayscale image is defined as a 
+      morphological operation as seen in the following research 
+      papers:
+      */
+
+      /******************************************************
+       
+       * Algorithm given in the research papers:
+         [1] Vincent, L., "Morphological Grayscale Reconstruction 
+             in Image Analysis: Applications and Efficient Algorithms,
+             " IEEE Transactions on Image Processing, Vol. 2, 
+             No. 2, April, 1993, pp. 176-201.
+         [2] Soille, P., Morphological Image Analysis: Principles 
+             and Applications, Springer-Verlag, 1999, pp. 170-171.
+
+       * Morphological image reconstruction is a common function
+         used in morphological transformation functions such as
+         imhmax, imhmin, imextendedmin, imextendedmax, imfill,
+         imimposemin
+
+       * Image reconstruction by erosion uses erosion and
+         expanding the marker image by the mask, hence the
+         `max`.
+
+      *******************************************************/
       Mat gray_image;
       cvtColor(image, gray_image, CV_BGR2GRAY);
 
@@ -156,8 +190,9 @@ extern "C"
           marker.at<uchar>(i,j) = gray_image.at<uchar>(i,j);
         }
       }
-
-      imfill_imreconstruct(gray_image, marker, dst);
+      
+      // Defined in common.c
+      imreconstruct_by_erosion(gray_image, marker, dst);
     }
     
     
@@ -175,18 +210,7 @@ extern "C"
     ReturnArguments(pvApiCtx);
     return 0;
 
-  }
-  void imfill_imreconstruct(Mat g, Mat f, Mat& dest)
-  {
-    Mat m0, m1, m;
-    m1 = f;
-    do {
-      m0 = m1.clone();
-      erode(m0, m, Mat());
-      max(g, m, m1);
-    } while(countNonZero(m1 != m0) != 0);
-    dest = m1.clone();
-  }  
+  } 
 
 /* ==================================================================== */
 }
