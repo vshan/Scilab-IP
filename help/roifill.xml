@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0-subset Scilab" xml:id="roifill" xml:lang="en_US"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:ns3="http://www.w3.org/1999/xhtml"
+          xmlns:mml="http://www.w3.org/1998/Math/MathML"
+          xmlns:db="http://docbook.org/ns/docbook">
+
+  <refnamediv>
+    <refname>roifill</refname>
+
+    <refpurpose>Fill in specified region of interest (ROI) polygon in grayscale image</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <title>Calling Sequence</title>
+
+    <synopsis>return_image = roifill(input_image, mask);</synopsis>
+    <synopsis>return_image = roifill(input_image, column_list, row_list);</synopsis>
+  </refsynopsisdiv>
+  
+  <refsection>
+      <title>Arguments</title>
+    <variablelist>
+      <varlistentry><term>input_image:</term>
+        <listitem><para>The image matrix to which the inward filling interpolation has to be applied</para></listitem>
+      </varlistentry>
+      <varlistentry><term>mask:</term>
+        <listitem><para>The binary image which specifies the ROI to perform interpolation on</para></listitem>
+      </varlistentry>
+      <varlistentry><term>column_list:</term>
+        <listitem><para>List containing the column indices of polygon vertices, which form the required ROI</para></listitem>
+      </varlistentry>
+      <varlistentry><term>row_list:</term>
+        <listitem><para>List containing the row indices of polygon vertices, which form the required ROI</para></listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+  
+  <refsection>
+    <title>Description</title>
+    <para>
+        This function fills the regions in image input_image specified by mask. Non-zero pixels in mask designate the pixels of image input_image to fill. You can use roifill to remove objects in an image or to replace invalid pixel values using their neighbors.
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Example</title>
+    <programlisting role="example"><![CDATA[
+              a = imread("/home/Pictures/img.jpg");
+              mask = imread("/home/Pictures/mask.jpg");
+              b = roifill(a, mask);
+              imshow(b);
+      ]]></programlisting>
+      <programlisting role="example"><![CDATA[
+              a = imread("/home/Pictures/img.jpg");
+              b = roifill(a, [0 10], [0 10]);
+              imshow(b);
+      ]]></programlisting>
+  </refsection>
+
+  <refsection>
+    <title>Authors</title>
+
+    <simplelist type="vert">
+      <member>Vinay Bhat</member>
+    </simplelist>
+  </refsection>
+</refentry>

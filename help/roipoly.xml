@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0-subset Scilab" xml:id="roipoly" xml:lang="en_US"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:ns3="http://www.w3.org/1999/xhtml"
+          xmlns:mml="http://www.w3.org/1998/Math/MathML"
+          xmlns:db="http://docbook.org/ns/docbook">
+
+  <refnamediv>
+    <refname>roipoly</refname>
+
+    <refpurpose>Specify polygonal region of interest (ROI)</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <title>Calling Sequence</title>
+    <synopsis>return_image = roipoly(input_image, column_list, row_list);</synopsis>
+  </refsynopsisdiv>
+  
+  <refsection>
+      <title>Arguments</title>
+    <variablelist>
+      <varlistentry><term>input_image:</term>
+        <listitem><para>The image matrix on which ROI is specified</para></listitem>
+      </varlistentry>
+      <varlistentry><term>column_list:</term>
+        <listitem><para>List containing the column indices of polygon vertices, which form the required ROI</para></listitem>
+      </varlistentry>
+      <varlistentry><term>row_list:</term>
+        <listitem><para>List containing the row indices of polygon vertices, which form the required ROI</para></listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+  
+  <refsection>
+    <title>Description</title>
+    <para>
+        Use roipoly to specify a polygonal region of interest (ROI) within an image. roipoly returns a binary image that you can use as a mask for masked filtering.
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Example</title>
+      <programlisting role="example"><![CDATA[
+              a = imread("/home/Pictures/img.jpg");
+              b = roipoly(image, [0 100 100 0], [0 0 100 100]);
+              imshow(b);
+      ]]></programlisting>
+  </refsection>
+
+  <refsection>
+    <title>Authors</title>
+
+    <simplelist type="vert">
+      <member>Vinay Bhat</member>
+    </simplelist>
+  </refsection>
+</refentry>

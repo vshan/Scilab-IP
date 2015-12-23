@@ -160,6 +160,7 @@ extern "C"
         fillPoly(mask, ppt, npt, 1, Scalar(255, 255, 255), lineType);
     }
 
+    // Call the inpaint OpenCV function
     inpaint(image, mask, fin_image, 3, INPAINT_TELEA);
 
     string tempstring = type2str(fin_image.type());
