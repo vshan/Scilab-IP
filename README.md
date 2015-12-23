@@ -2,7 +2,8 @@
 Image Processing codes for Scilab
 
 ## Instructions
-Get the `Scilab-Image-Processing-Toolbox-master` folder, put it in some path $P.
+Get the `Scilab-Image-Processing-Toolbox-master` folder, put it in some path `$P`.
+
 Copy relevant files to the folder.
 
 ```bash
