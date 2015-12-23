@@ -124,8 +124,16 @@ extern "C"
         int npt[] = { number_of_points };
 
         // Create a new, black, blank image same size as of input
-        mask_orig = Mat::zeros(image.size(), image.type());
-        cvtColor(mask_orig, mask, CV_BGR2GRAY);
+        Mat mask_orig = Mat::zeros(marker.size(), marker.type());
+
+        if (mask_orig.type() != CV_8UC1)
+        { 
+          Mat tempM;
+          tempM = mask_orig.clone();
+          cvtColor(tempM, mask_orig, CV_BGR2GRAY);
+        }
+
+        mask = mask_orig.clone();
 
         // Call the fillPoly OpenCV function
         // Fill the blank image in the polygon specified
@@ -153,7 +161,7 @@ extern "C"
       cvtColor(tempM, mask, CV_8UC1);
     }
 
-    int i = 1;
+    i = 1;
     
     Mat temp0;
     Mat temp2 = marker.clone();

@@ -239,7 +239,8 @@ extern "C"
   // in the given distance matrix and ensures it is not
   // in sptSet
   Point minDistance(Mat distances, Mat sptSet)
-  {
+  { 
+    int i,j;
     float min = FLT_MIN;
     Point p;
     for (i = 0; i < distances.cols; i++)
@@ -260,6 +261,7 @@ extern "C"
   // given point. 
   vector<Point> getNeighbours(Point p)
   {
+    int i,j;
     vector<Point> neighs;
     Rect rect(Point(), marker.size());
     for (i = -1; i <= 1; i++) {
