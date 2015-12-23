@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0-subset Scilab" xml:id="imimposemin" xml:lang="en_US"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:ns3="http://www.w3.org/1999/xhtml"
+          xmlns:mml="http://www.w3.org/1998/Math/MathML"
+          xmlns:db="http://docbook.org/ns/docbook">
+
+  <refnamediv>
+    <refname>imimposemin</refname>
+
+    <refpurpose>Impose minima</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <title>Calling Sequence</title>
+
+    <synopsis>output_image = deconvlucy(input_image, BW);</synopsis>
+  </refsynopsisdiv>
+  
+  <refsection>
+      <title>Arguments</title>
+    <variablelist>
+      <varlistentry><term>input_image:</term>
+        <listitem><para>The image matrix to which the minima has to be imposed</para></listitem>
+      </varlistentry>
+      <varlistentry><term>BW:</term>
+        <listitem><para>The mask specifying the minima</para></listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+  
+  <refsection>
+    <title>Description</title>
+    <para>
+       This function modifies the intensity image input_image using morphological reconstruction so it only has regional minima wherever BW is 1 or 255. BW is a binary image the same size as I.
+    </para>
+  </refsection>
+
+  <refsection>
+    <title>Example</title>
+    <programlisting role="example"><![CDATA[
+              a = imread("/home/Pictures/img.jpg");
+              b = imread("/home/Pictures/mask.png");
+              c = imimposemin(a, b);
+              imshow(c);
+      ]]></programlisting>
+  </refsection>
+
+  <refsection>
+    <title>Authors</title>
+
+    <simplelist type="vert">
+      <member>Vinay Bhat</member>
+    </simplelist>
+  </refsection>
+</refentry>
