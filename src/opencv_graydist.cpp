@@ -23,7 +23,7 @@ extern "C"
   #include "../common.h"
 
   Point minDistance(Mat, Mat);
-  vector<Point> getNeighbours(Point);
+  vector<Point> getNeighbours(Point, Rect);
 
   int opencv_graydist(char *fname, unsigned long fname_len)
   {
@@ -35,7 +35,7 @@ extern "C"
     int *piAddr2  = NULL;
     double *pstDataR = NULL;
     double *pstDataC = NULL;
-    int i, number_of_points;
+    int number_of_points;
     int lineType = 8;
 
     //checking input argument
@@ -54,6 +54,8 @@ extern "C"
       Mat temp = marker.clone();
       cvtColor(temp, marker, CV_BGR2GRAY);
     }
+
+    Rect rect(Point(), marker.size());
 
     // Check if the number of arguments passed is three,
     // if so, then the column_list and row_list are provided.
@@ -120,7 +122,7 @@ extern "C"
         // Create the n points which define
         // the polygon
         Point points[1][number_of_points];
-        
+        int i;
         for (i = 0; i < number_of_points; i++)
         {
             if (pstDataR[i] < 0 || pstDataC[i] < 0)
@@ -137,8 +139,13 @@ extern "C"
         int npt[] = { number_of_points };
 
         // Create a new, black, blank image same size as of input
-        mask_orig = Mat::zeros(image.size(), image.type());
-        cvtColor(mask_orig, mask, CV_BGR2GRAY);
+        mask = Mat::zeros(marker.size(), marker.type());
+        
+        if (mask.type() != CV_8UC1)
+        {
+          Mat temp = mask.clone();
+          cvtColor(temp, mask, CV_BGR2GRAY);  
+        }
 
         // Call the fillPoly OpenCV function
         // Fill the blank image in the polygon specified
@@ -168,6 +175,7 @@ extern "C"
 
     // Initialize the distance matrix to FLT_MAX, and
     // zero for the sources.
+    int i,j,c;
     for (i = 0; i < mask.cols; i++)
     {
       for (j = 0; j < mask.rows; j++)
@@ -193,17 +201,18 @@ extern "C"
       // The gray-weighted distance transform uses 3x3 connectivity,
       // hence the neighbours of a point p are the pixels directly
       // around it.
-      vector<Point> neighbours = getNeighbours(p);
-      markerVal = marker.at<uchar>(p.x, p.y);
+      vector<Point> neighbours = getNeighbours(p, rect);
+      unsigned char markerVal = marker.at<uchar>(p.x, p.y);
 
       // Update the distance matrix for all the neighbours
+      int k;
       for (k = 0; k < neighbours.size(); k++)
       { 
-        nVal = marker.at<uchar>(neighbours[k].x, neighbours[k].y);
+        unsigned char nVal = marker.at<uchar>(neighbours[k].x, neighbours[k].y);
 
         // The distance between two connected-pixels is the average of their
         // intensity values.
-        distN = (markerVal + nVal) / 2;
+        float distN = (markerVal + nVal) / 2.0;
 
         // Ensure that neighbour point isn't in sptSet, value of considered pixel
         // isn't FLT_MAX and that the sum of distance from u to v is less than
@@ -259,11 +268,10 @@ extern "C"
 
   // This function returns a vector containing the neighbours of a
   // given point. 
-  vector<Point> getNeighbours(Point p)
+  vector<Point> getNeighbours(Point p, Rect rect)
   {
     int i,j;
     vector<Point> neighs;
-    Rect rect(Point(), marker.size());
     for (i = -1; i <= 1; i++) {
       for (j = -1; j <= 1; j++) {
         if ( (rect.contains(Point(p.x + i, p.y + j))) && !(i == 0 && j == 0) )

@@ -32,7 +32,7 @@ extern "C"
     int *piAddr2  = NULL;
     double *pstDataR = NULL;
     double *pstDataC = NULL;
-    int i, number_of_points;
+    int number_of_points;
     int lineType = 8;
     double refGrayVal;
 
@@ -41,7 +41,7 @@ extern "C"
     CheckOutputArgument(pvApiCtx, 1, 1);
 
     // Get the input image from the Scilab environment
-    Mat image;
+    Mat image, mask;
     retrieveImage(image, 1);
 
     // Check if the image is grayscale or not,
@@ -95,11 +95,12 @@ extern "C"
         // then use it as reference gray value.
         float sum, count;
         sum = count = 0.0;
+        int i,j;
         for (i = 0; i < image.cols; i++)
         {
           for (j = 0; j < image.rows; j++)
           {
-            if (mask.at<uchar>(i,j))
+            if (mask.at<uchar>(i,j) != 0)
             {
               sum += image.at<uchar>(i,j);
               count++;
@@ -168,7 +169,7 @@ extern "C"
         sum = count = 0;
         // Number of points is number of columns
         number_of_points = iColsC;
-        
+        int i;
         for (i = 0; i < number_of_points; i++)
         {
             if (pstDataR[i] < 0 || pstDataC[i] < 0)
@@ -191,7 +192,7 @@ extern "C"
     // With the reference gray value computed, find the 
     // absolute difference between the image and 
     // the reference gray value scalar.
-    absdiff(image, refGrayVal, temp);
+    absdiff(image, refGrayVal, fin_image);
 
     string tempstring = type2str(fin_image.type());
     char *checker;

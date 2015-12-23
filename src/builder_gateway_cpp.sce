@@ -61,6 +61,9 @@ names = [
             "regionfill", "opencv_regionfill";
             "roifill", "opencv_roifill";
             "bwdistgeodesic", "opencv_bwdistgeodesic";
+            "graydist", "opencv_graydist";
+            "graydiffweight", "opencv_graydiffweight";
+            "deconvlucy", "opencv_deconvlucy";
 		];
 
 files = [
@@ -123,7 +126,10 @@ files = [
             "opencv_bwulterode.cpp",
             "opencv_regionfill.cpp",
             "opencv_roifill.cpp",
-            "opencv_bwdistgeodesic.cpp"
+            "opencv_bwdistgeodesic.cpp",
+            "opencv_graydist.cpp",
+            "opencv_graydiffweight.cpp",
+            "opencv_deconvlucy.cpp"
 		];
 
 function builder_gw_cpp()
