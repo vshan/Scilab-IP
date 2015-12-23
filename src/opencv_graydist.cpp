@@ -264,7 +264,7 @@ extern "C"
     Rect rect(Point(), marker.size());
     for (i = -1; i <= 1; i++) {
       for (j = -1; j <= 1; j++) {
-        if (rect.contains(Point(p.x + i, p.y + j)))
+        if ( (rect.contains(Point(p.x + i, p.y + j))) && !(i == 0 && j == 0) )
           neighs.push_back(Point(p.x + i, p.y + j));
       }
     }
