@@ -22,8 +22,6 @@ extern "C"
   #include "sciprint.h"
   #include "../common.h"
 
-  void imextendedmin_imreconstruct(Mat, Mat, Mat&);
-
   int opencv_imextendedmin(char *fname, unsigned long fname_len)
   {
 
@@ -64,9 +62,39 @@ extern "C"
     Mat gray_image, dst, fin_image, m, m2;
     cvtColor(image, gray_image, CV_BGR2GRAY);
     min((gray_image + h), 255, m);
-    imextendedmin_imreconstruct(gray_image, m, dst);
+
+    // Extended minima is the the regional minima of the 
+    // h-minima transform of the given image.
+
+    // * Algorithm given in the research papers:
+    //  [1] Vincent, L., "Morphological Grayscale Reconstruction 
+    //      in Image Analysis: Applications and Efficient Algorithms,
+    //      " IEEE Transactions on Image Processing, Vol. 2, 
+    //      No. 2, April, 1993.
+    //  [2] Soille, P., Morphological Image Analysis: Principles 
+    //      and Applications, Springer-Verlag, 1999.
+
+
+    /******************************************************
+      ** IMAGE RECONSTRUCTION **
+    * Algorithm given in the research papers:
+     [1] Vincent, L., "Morphological Grayscale Reconstruction 
+         in Image Analysis: Applications and Efficient Algorithms,
+         " IEEE Transactions on Image Processing, Vol. 2, 
+         No. 2, April, 1993, pp. 176-201.
+     [2] Soille, P., Morphological Image Analysis: Principles 
+         and Applications, Springer-Verlag, 1999, pp. 170-171.
+
+    * Image reconstruction by erosion uses erosion and
+     expanding the marker image by the mask, hence the
+     `max`.
+
+    *******************************************************/
+
+    // Function defined in common.cpp
+    imreconstruct_by_erosion(gray_image, m, dst);
     add(dst, 1, m2);
-    imextendedmin_imreconstruct(dst, m2, m);
+    imreconstruct_by_erosion(dst, m2, m);
     subtract(m, dst, m2);
     fin_image = m2 * 255;
 
@@ -84,17 +112,6 @@ extern "C"
     ReturnArguments(pvApiCtx);
     return 0;
 
-  }
-  void imextendedmin_imreconstruct(Mat g, Mat f, Mat& dest)
-  {
-    Mat m0, m1, m;
-    m1 = f;
-    do {
-      m0 = m1.clone();
-      erode(m0, m, Mat());
-      max(g, m, m1);
-    } while(countNonZero(m1 != m0) != 0);
-    dest = m1.clone();
   }
 /* ==================================================================== */
 }
