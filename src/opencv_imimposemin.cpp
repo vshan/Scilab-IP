@@ -38,6 +38,8 @@ extern "C"
     retrieveImage(marker, 2);
     
     Mat gray_mask, gray_marker;
+    // todo: change to if block for 
+    // checking if already CV_8UC1
     cvtColor(mask, gray_mask, CV_BGR2GRAY);
     cvtColor(marker, gray_marker, CV_BGR2GRAY);
 
